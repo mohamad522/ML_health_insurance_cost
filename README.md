@@ -11,6 +11,106 @@ Project Structure
 
 * * * * *
 
+## Running the Project
+
+### Prerequisites
+
+Before running the project, ensure that you have the necessary tools and dependencies set up:
+
+-   **Docker** to run RabbitMQ locally.
+-   **IntelliJ IDEA** for creating and running the Maven project.
+
+### 1\. Installing Docker and Running RabbitMQ
+
+First, install Docker if it's not already installed:
+
+bash
+
+Copy code
+
+`sudo apt install docker.io`
+
+Then, use Docker to run RabbitMQ with the management plugin (this will allow you to access RabbitMQ's web management interface):
+
+bash
+
+Copy code
+
+`docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management`
+
+-   **5672** is the default RabbitMQ port for messaging.
+-   **15672** is the port for RabbitMQ's web management UI.
+
+Once RabbitMQ is running, you can access its management interface by navigating to `http://localhost:15672` in your web browser. The default login credentials are:
+
+-   **Username**: `guest`
+-   **Password**: `guest`
+
+### 2\. Creating a Maven Project in IntelliJ IDEA
+
+1.  Open **IntelliJ IDEA** and click on **Create New Project**.
+2.  Choose **Maven** as the project type and click **Next**.
+3.  Set the **GroupId** and **ArtifactId** for your project. For example:
+    -   **GroupId**: `org.example`
+    -   **ArtifactId**: `rabbitmq-topics`
+4.  Click **Finish** to create the project.
+
+### 3\. Adding Dependencies
+
+Ensure you have the following dependency in your `pom.xml` to connect to RabbitMQ using Java:
+
+xml
+
+Copy code
+
+`<dependency>     <groupId>com.rabbitmq</groupId>     <artifactId>amqp-client</artifactId>     <version>5.14.0</version> </dependency>`
+
+This dependency is required to work with RabbitMQ from your Java code.
+
+### 4\. Running the Project with Parameters in IntelliJ IDEA
+
+To run the project with the appropriate parameters in IntelliJ IDEA, follow these steps:
+
+1.  Open the **Run/Debug Configurations** by clicking on the dropdown in the top-right corner and selecting **Edit Configurations**.
+2.  Click the **+** icon and choose **Application**.
+3.  In the **Name** field, give it a name like "Run User Events".
+4.  In the **Main class** field, set it to the class you want to run, e.g., `org.example.ReceiveUserEvents`.
+5.  In the **Program Arguments** field, provide the binding keys as parameters, for example:
+
+    bash
+
+    Copy code
+
+    `user.created.accounting.* user.created.email.*`
+
+    These parameters will bind the consumer to both the accounting and email queues.
+
+6.  Click **OK** to save the configuration.
+7.  Now, click the **Run** button (the green triangle) in IntelliJ to start the application.
+
+This will start the consumer program with the given routing key patterns. You can now send messages to RabbitMQ using the producer (`EmitUserCreatedEvent`) with routing keys like `user.created.accounting.new` or `user.created.email.welcome`.
+
+### 5\. Running the Producer in IntelliJ IDEA
+
+To run the producer, follow similar steps to create a new **Run Configuration** for the producer (`EmitUserCreatedEvent`). For example, if you want to send a message to the accounting system:
+
+1.  Open **Run/Debug Configurations**.
+2.  Add a new configuration for **Application**.
+3.  Set the **Main class** to `org.example.EmitUserCreatedEvent`.
+4.  In the **Program Arguments** field, provide the routing key and message, for example:
+
+    bash
+
+    Copy code
+
+    `user.created.accounting "New user created: John Doe"`
+
+5.  Click **OK** and run the producer.
+
+This will publish a message to RabbitMQ, which will then be consumed by the receiver (based on the routing key binding).
+
+* * * * *
+
 RabbitMQ Architecture
 ---------------------
 
